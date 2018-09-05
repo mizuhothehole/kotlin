@@ -1,0 +1,75 @@
+package com.example.ishiiaya.myapplication
+
+import android.app.Activity
+import android.graphics.PixelFormat
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.view.Window
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.Toast
+import java.util.ArrayList
+
+class MainActivity : Activity() {
+
+    private var positionX: Int = 0
+    private var positionY: Int = 0
+    private var mat: Matrix? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        positionX = this.applicationContext.resources.getInteger(R.integer.mapWidth).div(2)
+        positionY = this.applicationContext.resources.getInteger(R.integer.mapHeight).div(2)
+        val xyLines: ArrayList<ArrayList<Int>> = ArrayList(positionY)
+        for (a in 0..this.applicationContext.resources.getInteger(R.integer.mapWidth)) {
+            val yLine: ArrayList<Int> = ArrayList()
+            for (b in 0..this.applicationContext.resources.getInteger(R.integer.mapHeight)) {
+                if(b == 0) {
+                    yLine.add(1)
+                } else{
+                    if (a.div(b).rem(2) == 1) {
+                        yLine.add(2)
+                    } else {
+                        yLine.add(1)
+                    }
+                }
+                Log.d("Qin", "" + yLine[b])
+            }
+            xyLines.add(yLine)
+        }
+        mat = Matrix(xyLines, positionX, positionY)
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        super.onCreate(savedInstanceState)
+        val v: View = Button(this)
+        v.setOnClickListener { Toast.makeText(this, "Hi", Toast.LENGTH_LONG).show() }
+        v.alpha = 0.5F
+        val wm: WindowManager? = this.windowManager
+        val layoutParams = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
+                0, 0, PixelFormat.TRANSPARENT)
+        layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION
+        wm?.addView(v, layoutParams)
+    }
+}
+
+package com.example.ishiiaya.myapplication
+
+class Matrix(var values: java.util.ArrayList<java.util.ArrayList<Int>>, var xP:Int, var yP:Int) {
+
+    fun setVal(x:Int,y:Int,value:Int){
+        values[x][y] = value
+    }
+
+    fun getVal(x:Int,y:Int):Int{
+        return values[x][y]
+    }
+
+    fun getCurrentPosition():Pair<Int,Int>{
+        return Pair(xP, yP)
+    }
+
+    fun setCurrentPosition(xP:Int, yP:Int){
+        this.xP = xP
+        this.yP = yP
+    }
+}
