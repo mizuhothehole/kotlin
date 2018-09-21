@@ -1,0 +1,38 @@
+I tried the kotlin in online compiler
+    
+    abstract class Hi {
+      abstract fun Hi1()
+      abstract fun Hi2()
+    }
+    var test:Double? = 2.22
+    test?.let{it}?.let{it}?.let{2}
+    var tt:Hi?=null
+    var ii:Int?=null
+    val mkk:(Int,Int) -> Int={a,b -> a-b}
+    val mmm:((Int,Int)->Int,Int)->Int={f,a->f(11,1)+a}
+    mkk(11,11)
+    mmm(mkk,22)
+
+The result to be like this:
+
+Welcome to Kotlin version 1.0.3
+   
+2
+0
+32
+   
+So what I am thinking about kotlin lamda is:
+
+announcement: var a:(Type1, Type2...) -> Type3
+              val b:(Type1, Type2...) -> Type3
+
+usage:        a(x,y)
+              b(x,y)
+
+argement announcement:
+
+fun test(a:(Type1, Type2...) -> Type3, b:Int){
+... ...
+}
+
+Just think it like a kind of type. This is enough to use it.
