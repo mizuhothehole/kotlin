@@ -1,0 +1,88 @@
+How the compose works
+
+link https://stackoverflow.com/questions/69853719/recompose-in-android-compose/69855799#69855799
+
+Basically, recomposition is just an event in Compose, in which the Composable is re-executed. In declarative coding, which is what Compose is based on, we write UI as functions (or methods, more commonly). Now, a recomposition is basically an event in which the UI is re-emitted, by executing the body of the Composable "function" all over again. This is what recomposition is, at its core. Now on to when it is triggered.
+
+Ok, so in order to trigger recompositions, we need a special type of variable. This type is built into compose and was specifically designed to let it know when to recompose. And the mentioned type is MutableState. As the name suggests, it is State, that can Mutate, i.e., change; vary.
+
+So, we have a variable of type MutableState, what's next? Guess what, you DON'T have a variable of type MutableState because I didn't teach you how to create one! The most common assignment you will use in Compose is the mutableStateOf. This is a pre-defined method that returns a value of type MutableState, well, MutableState<T>, actually. T is the type of State here, see below
+
+var a = mutableStateOf(999)
+
+Above, as you can see, 999 is an int, and so, mutableStateOf here will return a MutableState<Int> type value. Easy enough.
+
+Now, we have a MutableState<Int> value, but honestly, that's kinda ugly. every time you need to get the value out of the MutableState<T>, you would need to refer to a property conveniently named .value.
+
+So, to get the 999 out of the above var a, you would need to call a.value. Now, this is fine for use at one or two places but calling this every time seems like a mess. That is where Kotlin Property Delegation Come In (I did not need to Capitalize the last two words, I know). We use the by keyword to retrieve the value out of the state, and assign that to our variable - That's all you should care about.
+
+So, var a by mutableStateOf(999) will actually return 999 of type Int, and not of type MutableState<Int>, but the brilliant part is that Compose will still know that the variable a is a State-Holder. So basically mutableStateOf can be thought of as a registering-counter, which you just need to pass through once, in order to get registered in the list of State-Holders. As of when, a recomposition will trigger every time the value of one of the state-holders is changed. This is the rough idea, but let's get technical. Now, we can get on to the "how" of recomposition.
+
+To trigger a recomposition, all you need to ensure is two things:
+
+The Composable should be reading a variable, that is also a state-holder
+The state-holder should experience a change in its current value
+Everything's better with Perry Examples:-
+
+var a by mutableStateOf(999)
+
+Case 1: A Composable receives a as a parameter value, MyComposable(a), then I run a = 0, Outcome 1: Recomposition Triggered
+
+Case II: Variable a is actually declared inside a Composable itself, then I run var a = 12344 Outcome II: Recomposition Triggered
+
+Case III: I repeat cases 1 & II, but with a different variable, as follows: var b = 999
+Outcome III: No Recompositions Triggered; Reason: b is not a state-holder
+
+Great, we got the basics down now. So, this is the last phase of this lecture.
+
+REMEMBER!!
+
+You see when I say during recomposition, the entire Composable is re-executed, I mean the entire Composable is re-executed, that is, every single line and every single assignment, without exceptions. You see anything wrong with this yet? Lemme demonstrate
+
+Let's say I want to have a Text Composable that displays a number, and increases that number when I click on it.
+
+I could implement something as simple as this
+
+@Composable
+fun CountingText(){
+ var n = mutableStateOf(0) //Starts at 0
+ Text(
+  value = n.toString(), //The Composable only accepts strings, while n is of Int type
+  modifier = Modifier
+             .clickable { n++ }
+ )
+}
+Ok so this is the implementation that we might think would work. If you are unfamiliar with Modifiers, just leave that for now and trust me that it just triggers the code inside the clickable braces, when you actually click on the Text. Now, let's picture how this will be executed.
+
+Firstly Compose will register the variable n as a state-holder. Then it will render the Text Composable with the initial value 0 of n.
+
+Now, the Text is actually clicked. The block inside clicakble will be executed, which in this case is just n++, which will update the value of n. Compose sees that the value of n is updated, and runs through the list of state-holders. Compose finds that n is indeed a state-holder, and then decides to trigger a recomposition. Now, the entire Composable reading the value of n will be recomposed. In this case, that Composable is CountingText since a Text inside it is reading the value of n (To display it). Hence, CountingText will be "re-executed". Let's walk through the re-execution here.
+
+First line in the Composable,
+
+var n = mutableStateOf(0)
+
+n became 0.
+
+Next lines:-
+
+Text(
+  value = n.toString(), //Just displays 0 
+  modifier = Modifier 
+             .clickable { n++ } //Just tells it to increase n upon click
+ )
+So you see, the catch here is that upon re-execution, n is completely created from scratch as if it never existed before. It was removed from the Composable's memory. To counter this, we need the Composable to remember n. That way, Compose knows that this is a state-holder AND holds a value that needs to be re-assigned to it upon recomposition. So, here's the updated first line (the rest is the same, just the initialization is updated)
+
+var n by remember { mutableStateOf(0) }
+
+Now, upon first execution, n will receive 0, since it is actually the very first time n is created. Thanks to remember, n now has access to the Composable's memory, and thus will be stored in the memory for future usage.
+
+So, during recomposition, this is what happens - When the executor (???) reaches the line where n is assigned,
+
+var n by remember { mutableStateOf(0) }
+
+remember actually acts as a gatekeeper, and does not allow the executor to enter the block contained in it. Instead, it passes it the previously remembered value and asks it to move on. Since when the user clicked the Text, it already incremented the value of n to 1, this was retained in memory and so, now this works as expected.
+
+This is the same case for your TextField problem. The field initially reads an empty value and the value is updated every time the user types a letter, triggering a recomposition and finally displaying the correct value on the screen.
+
+Could it get simpler enough? Let me know I spent half an hour typing this.
