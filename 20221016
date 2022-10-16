@@ -1,0 +1,3 @@
+The init block will execute immediately after the primary constructor. Initializer blocks effectively become part of the primary constructor.
+
+The constructor is the secondary constructor. Delegation to the primary constructor happens as the first statement of a secondary constructor, so the code in all initializer blocks is executed before the secondary constructor body.
