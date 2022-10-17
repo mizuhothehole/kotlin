@@ -1,0 +1,13 @@
+kotlin接受标准输入
+readtext：
+https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.io/read-line.html
+readin
+
+
+GlobalScope
+
+coroutine的一种。
+这个类似于全局的daemon，process结束就跟着结束。
+一般来说不会用这个。
+用的时候，要声明如下的annotation。
+https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-delicate-coroutines-api/
